@@ -20,8 +20,8 @@ Build a map-based application, which lets the user see geo-based data on a map a
 
 Fork this repository and fill in (either in English, or in Slovak):
 
-**Application description**: `<fill in>`
+**Application description**: Zobrazenie vojnových konfliktov z obdobia 97-14 v oblasti Afriky a Ázie
 
-**Data source**: `<fill in>`
+**Data source**: http://www.acleddata.com/data/
 
-**Technologies used**: `<fill in>`
+**Technologies used**: Mapbox, Ruby on Rails, GeoJSON, postgis
