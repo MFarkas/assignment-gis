@@ -24,7 +24,7 @@ default: &default
 development:
   <<: *default
   username: mehre
-  password: 
+  password: Baobab42
   database: GIS_development
 
   # The specified database role being used to connect to postgres.

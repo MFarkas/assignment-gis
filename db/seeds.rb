@@ -12,7 +12,7 @@ i=0
 hash["features"].each do |key, array|
         geom= hash["features"][i]["geometry"].to_s.gsub('=>',':')
         sql = "INSERT INTO conflicts  VALUES
-        (#{i},#{hash["features"][i]["properties"]["GWNO"]},'#{hash["features"][i]["properties"]["EVENT_ID_C"]}',#{hash["features"][i]["properties"]["EVENT_ID_N"]},'#{hash["features"][i]["properties"]["EVENT_DATE"]}',#{hash["features"][i]["properties"]["YEAR"]},'#{hash["features"][i]["properties"]["EVENT_TYPE"]}','#{hash["features"][i]["properties"]["COUNTRY"]}','#{hash["features"][i]["properties"]["NOTES"].to_s.gsub("'", "")}',#{hash["features"][i]["properties"]["FATALITIES"]}, ST_GeomFromGeoJSON('#{geom}'),'#{Time.now}','#{Time.now}')"
+        (#{i},#{hash["features"][i]["properties"]["GWNO"]},'#{hash["features"][i]["properties"]["EVENT_ID_C"]}',#{hash["features"][i]["properties"]["EVENT_ID_N"]},'#{hash["features"][i]["properties"]["EVENT_DATE"]}',#{hash["features"][i]["properties"]["YEAR"]},'#{hash["features"][i]["properties"]["EVENT_TYPE"]}','#{hash["features"][i]["properties"]["COUNTRY"]}','#{hash["features"][i]["properties"]["NOTES"].to_s.gsub("'", "").gsub("\n"," ").gsub(/"/, '')}',#{hash["features"][i]["properties"]["FATALITIES"]}, ST_GeomFromGeoJSON('#{geom}'),'#{Time.now}','#{Time.now}')"
 
   ActiveRecord::Base.connection.execute(sql)
   #puts "Loading...#{i}%"

@@ -1,0 +1,26 @@
+<div id="nav">
+  <%= form_tag({controller: "map", action: "search"}, method: "get", class: "nifty_form") do %>
+      <%= label_tag(:start, "Conflict date:") %>
+      <p>
+        <%= datetime_field(:event, :date_start) %>
+        <%= datetime_field(:event, :date_stop) %>
+      </p>
+      <%= label_tag(:country, "Country:") %>
+      <%= search_field(:event, :country) %>
+      <p>
+      <%= label_tag(:fatals, "Fatalities:") %>
+      <%= search_field(:event, :fatals) %>
+      </p>
+      <p>
+        <%= label_tag(:kwds, "Keywords:") %>
+        <%= search_field(:event, :kwds) %>
+      </p>
+      <p>
+        <%= label_tag(:parts, "Participants:") %>
+        <%= search_field(:event, :parts) %>
+      </p>
+      <p>
+            <%= submit_tag("Search") %>
+      </p>
+  <% end %>
+</div>

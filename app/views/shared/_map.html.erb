@@ -1,0 +1,12 @@
+<div id='section'>
+
+
+  <div id="map"></div>
+        <script>
+            var geojson= <%= raw @geojson.to_s.gsub('=>',':')%>
+                    L.mapbox.accessToken = 'pk.eyJ1IjoibWZhcmthcyIsImEiOiJjaWZzb2JpenowMXcydTRsejNtN2J3M2IwIn0.aBcVeivukzoDpesJrsB-SQ';
+            var map = L.mapbox.map('map', 'mapbox.streets')
+                    .setView([0, 35], 4)
+                    .featureLayer.setGeoJSON(geojson);
+        </script>
+</div>
