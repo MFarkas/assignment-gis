@@ -4,9 +4,28 @@
   <div id="map"></div>
         <script>
             var geojson= <%= raw @geojson.to_s.gsub('=>',':')%>
-                    L.mapbox.accessToken = 'pk.eyJ1IjoibWZhcmthcyIsImEiOiJjaWZzb2JpenowMXcydTRsejNtN2J3M2IwIn0.aBcVeivukzoDpesJrsB-SQ';
+            L.mapbox.accessToken = 'pk.eyJ1IjoibWZhcmthcyIsImEiOiJjaWZzb2JpenowMXcydTRsejNtN2J3M2IwIn0.aBcVeivukzoDpesJrsB-SQ';
             var map = L.mapbox.map('map', 'mapbox.streets')
                     .setView([0, 35], 4)
-                    .featureLayer.setGeoJSON(geojson);
+
+
+
+
+            var fl= L.mapbox.featureLayer(geojson).addTo(map)
+
+            fl.eachLayer(function(layer) {
+
+                // here you call `bindPopup` with a string of HTML you create - the feature
+                // properties declared above are available under `layer.feature.properties`
+                var content = '<h2>'+ layer.feature.properties.title+'<\/h2>' +
+                        '<p><b>Country:</b> ' + layer.feature.properties.country + '<br \/>' +
+                        '<b>Fatalities:</b> ' + layer.feature.properties.fatalities + '<br \/>' +
+                        '<b>Conflict date:</b> ' + layer.feature.properties.event_date + '<br \/>'+
+                        layer.feature.properties.description +'<br \/>' +'<\/p>';
+                layer.bindPopup(content);
+            });
+
+
+            //L.mapbox.featureLayer.bindPopup(content);
         </script>
 </div>

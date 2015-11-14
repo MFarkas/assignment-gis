@@ -7,7 +7,7 @@ class Conflict < ActiveRecord::Base
     "properties": {
       "title": "'+self.event_type+'",
       "description": "'+self.notes.gsub('\n',' ')+'",
-      "event_date": "'+self.event_date.to_s+'",
+      "event_date": "'+self.event_date.to_date.to_s+'",
       "country": "'+self.country+'",
       "fatalities": "'+self.fatalities.to_s+'",
       "marker-color": "#fc4353",

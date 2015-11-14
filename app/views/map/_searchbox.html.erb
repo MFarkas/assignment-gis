@@ -2,14 +2,14 @@
   <%= form_tag({controller: "map", action: "search"}, method: "get", class: "nifty_form") do %>
       <%= label_tag(:start, "Conflict date:") %>
       <p>
-        <%= datetime_field(:event, :date_start) %>
-        <%= datetime_field(:event, :date_stop) %>
+        <%= datetime_field(:event, :date_start,:placeholder=> "from-YYYY-MM-DD" ) %>
+        <%= datetime_field(:event, :date_stop, :placeholder=> "to-YYYY-MM-DD" ) %>
       </p>
       <%= label_tag(:country, "Country:") %>
       <%= search_field(:event, :country) %>
       <p>
       <%= label_tag(:fatals, "Fatalities:") %>
-      <%= search_field(:event, :fatals) %>
+      <%= search_field(:event, :fatals,  :placeholder=> "e.g >50 , <87" ) %>
       </p>
       <p>
         <%= label_tag(:kwds, "Keywords:") %>
