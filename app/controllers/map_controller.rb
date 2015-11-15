@@ -11,23 +11,39 @@ class MapController < ApplicationController
       end
     end
     @geojson << ']'
+    @countries= Country.all
+    @event_types= EventType.all
   end
   def search
+    @countries= Country.all
+    @event_types= EventType.all
     @conflicts= Conflict.all
-    if(params[:event][:country]!= "")
-      @conflicts= @conflicts.where("COUNTRY LIKE '#{params[:event][:country]}'")
+    if(params[:event][:kwds]!= "")
+      @conflicts= @conflicts.where("tsv @@ plainto_tsquery(?)",params[:event][:kwds])
+    end
+    if(params[:event][:type_id]!= "0")
+      @conflicts= @conflicts.where("EVENT_TYPE_ID = ?",params[:event][:type_id])
+    end
+    if(params[:event][:country_id]!= "1")
+      @conflicts= @conflicts.where("COUNTRY_ID = ?",params[:event][:country_id])
+    end
+    if(params[:event][:actor1]!= "0")
+      @conflicts= @conflicts.where("INTER1 = ?",params[:event][:actor1])
+    end
+    if(params[:event][:actor2]!= "0")
+      @conflicts= @conflicts.where("INTER2 = ?",params[:event][:actor2])
     end
     if(params[:event][:fatals]!="")
-      @conflicts= @conflicts.where("FATALITIES #{params[:event][:fatals][0]} '#{params[:event][:fatals][1..-1]}'")
+      @conflicts= @conflicts.where("FATALITIES #{params[:event][:fatals][0]} ?",params[:event][:fatals][1..-1])
     end
     if((params[:event][:date_stop]!="") && (params[:event][:date_start]!=""))
       start= params[:event][:date_start]+ " 00:00:00"
       stop=  params[:event][:date_stop] + " 00:00:00"
-      @conflicts= @conflicts.where("event_date between '#{start}' and '#{stop}'")
+      @conflicts= @conflicts.where("event_date between ? and ?",start,stop)
     end
     @geojson= []
     @geojson << '['
-    @conflicts.each.with_index do |c, index|
+    @conflicts.includes(:country).each.with_index do |c, index|
       @geojson << JSON[c.build_geojson.to_s.gsub('\n', '')]
       if(index < (@conflicts.size-1))
         @geojson<< ','

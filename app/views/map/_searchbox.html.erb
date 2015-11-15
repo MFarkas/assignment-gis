@@ -1,24 +1,29 @@
 <div id="nav">
   <%= form_tag({controller: "map", action: "search"}, method: "get", class: "nifty_form") do %>
       <%= label_tag(:start, "Conflict date:") %>
-      <p>
+      <br>
         <%= datetime_field(:event, :date_start,:placeholder=> "from-YYYY-MM-DD" ) %>
         <%= datetime_field(:event, :date_stop, :placeholder=> "to-YYYY-MM-DD" ) %>
-      </p>
-      <%= label_tag(:country, "Country:") %>
-      <%= search_field(:event, :country) %>
       <p>
+      <%= label_tag(:country, "Country:") %>
+      <%= collection_select(:event, :country_id, @countries.all, :id, :name) %>
+      <br>
+      <%= label_tag(:country, "Event type:") %>
+      <%= collection_select(:event, :type_id, @event_types.all, :id, :type_name) %>
+      </p>
+      <p>
+      <%= label_tag(:country, "Actor1:") %>
+      <%= select(:event, :actor1, [['<Undefined>',0],['Government or mutinous force', 1], ['Rebel force', 2], ['Political militia', 3], ['Ethnic militia', 4], ['Rioters', 5], ['Protesters', 6], ['Civilians', 7]]) %>
+      <br>
+      <%= label_tag(:country, "Actor2:") %>
+      <%= select(:event, :actor2, [['<Undefined>',0],['Government or mutinous force', 1], ['Rebel force', 2], ['Political militia', 3], ['Ethnic militia', 4], ['Rioters', 5], ['Protesters', 6], ['Civilians', 7]]) %>
+      </p>
       <%= label_tag(:fatals, "Fatalities:") %>
       <%= search_field(:event, :fatals,  :placeholder=> "e.g >50 , <87" ) %>
-      </p>
-      <p>
+      <br>
         <%= label_tag(:kwds, "Keywords:") %>
-        <%= search_field(:event, :kwds) %>
-      </p>
-      <p>
-        <%= label_tag(:parts, "Participants:") %>
-        <%= search_field(:event, :parts) %>
-      </p>
+        <%= search_field(:event, :kwds,   :placeholder=> "keyword1 & keyword2") %>
+      <br>
       <p>
             <%= submit_tag("Search") %>
       </p>

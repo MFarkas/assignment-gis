@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151103220915) do
+ActiveRecord::Schema.define(version: 20151114182544) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -23,13 +23,30 @@ ActiveRecord::Schema.define(version: 20151103220915) do
     t.integer  "event_id_n"
     t.datetime "event_date"
     t.integer  "year"
-    t.string   "event_type"
-    t.string   "country"
+    t.integer  "event_type_id"
+    t.integer  "country_id"
     t.string   "notes"
     t.integer  "fatalities"
-    t.geometry "geometry",   limit: {:srid=>0, :type=>"geometry"}
-    t.datetime "created_at",                                       null: false
-    t.datetime "updated_at",                                       null: false
+    t.integer  "inter1"
+    t.integer  "inter2"
+    t.string   "actor1"
+    t.string   "actor2"
+    t.integer  "interaction"
+    t.geometry "geometry",      limit: {:srid=>0, :type=>"geometry"}
+    t.datetime "created_at",                                          null: false
+    t.datetime "updated_at",                                          null: false
+  end
+
+  create_table "countries", force: :cascade do |t|
+    t.string   "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "event_types", force: :cascade do |t|
+    t.string   "type_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
 end

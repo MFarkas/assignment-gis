@@ -6,10 +6,15 @@ class CreateConflicts < ActiveRecord::Migration
       t.integer   :event_id_n
       t.datetime  :event_date
       t.integer   :year
-      t.string    :event_type
-      t.string    :country
+      t.integer   :event_type_id
+      t.integer   :country_id
       t.string    :notes
       t.integer   :fatalities
+      t.integer   :inter1
+      t.integer   :inter2
+      t.string    :actor1
+      t.string    :actor2
+      t.integer   :interaction
       #t.column    :geometry, :geometry
       t.geometry :geometry
       t.timestamps null: false
