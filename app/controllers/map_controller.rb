@@ -52,4 +52,28 @@ class MapController < ApplicationController
     @geojson << ']'
     render :show
   end
+
+  def show_related_conflicts
+    @countries= Country.all
+    @event_types= EventType.all
+
+    selected_conflict= Conflict.find(params[:id])
+    sc_json= JSON[selected_conflict.build_geojson]
+    @center= { :y => sc_json["geometry"]["coordinates"][0], :x => sc_json["geometry"]["coordinates"][1] }
+    @conflicts= Conflict.all.where("ST_DWithin(geometry, ?,0.5)",selected_conflict.geometry)
+    #,selected_conflict.event_date,
+    #28>abs(EXTRACT( DAY FROM (event_date- ?)))) AND
+    @geojson= []
+    @geojson << '['
+    @conflicts.each.with_index do |c, index|
+      @geojson << JSON[c.build_geojson.to_s.gsub('\n', '')]
+      if(index < (@conflicts.size-1))
+        @geojson<< ','
+      end
+    end
+    @geojson << ']'
+    @countries= Country.all
+    @event_types= EventType.all
+    render :show
+  end
 end

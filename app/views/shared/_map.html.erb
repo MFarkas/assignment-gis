@@ -1,33 +1,45 @@
 <div id='section'>
 
-
+  <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js'></script>
+  <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css' rel='stylesheet' />
+  <link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.Default.css' rel='stylesheet' />
   <div id="map"></div>
-        <script>
-            var geojson= <%= raw @geojson.to_s.gsub('=>',':')%>
-            L.mapbox.accessToken = 'pk.eyJ1IjoibWZhcmthcyIsImEiOiJjaWZzb2JpenowMXcydTRsejNtN2J3M2IwIn0.aBcVeivukzoDpesJrsB-SQ';
-            var map = L.mapbox.map('map', 'mapbox.streets')
-                    .setView([0, 35], 4)
+  <script>
+      var geojson= <%= raw @geojson.to_s.gsub('=>',':')%>
+              L.mapbox.accessToken = 'pk.eyJ1IjoibWZhcmthcyIsImEiOiJjaWZzb2JpenowMXcydTRsejNtN2J3M2IwIn0.aBcVeivukzoDpesJrsB-SQ';
+      var map = L.mapbox.map('map', 'mapbox.streets')
+              .setView([0, 35], 4)
 
 
+      var fl= L.mapbox.featureLayer(geojson).addTo(map)
 
 
-            var fl= L.mapbox.featureLayer(geojson).addTo(map)
+      <% if !@center.blank?%>
+          var centerX= <%= @center[:x] %>
+          var centerY= <%= @center[:y] %>
+          var RADIUS = 55550;
+          var filterCircle = L.circle(L.latLng(centerX,centerY), RADIUS, {
+              opacity: 1,
+              weight: 1,
+              fillOpacity: 0.4
+          }).addTo(map);
+      <%end%>
+      fl.eachLayer(function(layer) {
 
-            fl.eachLayer(function(layer) {
+          // here you call `bindPopup` with a string of HTML you create - the feature
+          // properties declared above are available under `layer.feature.properties`
+          var content = '<h2>'+ layer.feature.properties.title+'<\/h2>' +
+                  '<p><b>Country:</b> ' + layer.feature.properties.country + '<br \/>' +
+                  '<b>Fatalities:</b> ' + layer.feature.properties.fatalities + '<br \/>' +
+                  '<b>Actor1:</b> ' + layer.feature.properties.actor1 + '<br \/>' +
+                  '<b>Actor2:</b> ' + layer.feature.properties.actor2 + '<br \/>' +
+                  '<b>Conflict date:</b> ' + layer.feature.properties.event_date + '<br \/>'+
+                  layer.feature.properties.description +'<br \/>' +
+                  '<a  href="' + '/related_to/'+layer.feature.properties.id + '">'+'related conflicts'+'</a>';
+          layer.bindPopup(content);
+      });
+      map.fitBounds(fl.getBounds());
 
-                // here you call `bindPopup` with a string of HTML you create - the feature
-                // properties declared above are available under `layer.feature.properties`
-                var content = '<h2>'+ layer.feature.properties.title+'<\/h2>' +
-                        '<p><b>Country:</b> ' + layer.feature.properties.country + '<br \/>' +
-                        '<b>Fatalities:</b> ' + layer.feature.properties.fatalities + '<br \/>' +
-                        '<b>Actor1:</b> ' + layer.feature.properties.actor1 + '<br \/>' +
-                        '<b>Actor2:</b> ' + layer.feature.properties.actor2 + '<br \/>' +
-                        '<b>Conflict date:</b> ' + layer.feature.properties.event_date + '<br \/>'+
-                        layer.feature.properties.description +'<br \/>' +'<\/p>';
-                layer.bindPopup(content);
-            });
-
-
-            //L.mapbox.featureLayer.bindPopup(content);
-        </script>
+      //L.mapbox.featureLayer.bindPopup(content);
+  </script>
 </div>

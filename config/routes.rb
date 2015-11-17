@@ -5,5 +5,6 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
    root 'map#show'
    get 'search' => 'map#search'
+  get 'related_to/:id' => 'map#show_related_conflicts'
 
 end

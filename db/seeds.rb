@@ -5,10 +5,7 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
-str= File.absolute_path("db/ACLED_GIS_2015.json")
-file = File.read(str)
-hash= ActiveSupport::JSON.decode(file)
-i=0
+
 ##########EVENT_TYPES################
 sql= "INSERT INTO event_types VALUES
 (0,'<Undefined>','#{Time.now}','#{Time.now}'),
@@ -21,7 +18,7 @@ sql= "INSERT INTO event_types VALUES
 (7,'Violence against civilians','#{Time.now}','#{Time.now}'),
 (8,'Remote violence','#{Time.now}','#{Time.now}'),
 (9,'Battle-Government regains territory','#{Time.now}','#{Time.now}')"
-
+puts "Event types loaded"
 ActiveRecord::Base.connection.execute(sql)
 ##########COUNTRIES##################
 sql ="INSERT INTO countries  VALUES
@@ -76,13 +73,48 @@ sql ="INSERT INTO countries  VALUES
 	(49,'Mali','#{Time.now}','#{Time.now}'),
 	(50,'Sudan','#{Time.now}','#{Time.now}'),
 	(51,'Tanzania','#{Time.now}','#{Time.now}')"
-
+puts "Countries loaded"
 ActiveRecord::Base.connection.execute(sql)
+###########CITIES###################
+puts "Reading File, standby"
+str= File.absolute_path("db/ne_50m_populated_places_simple.json")
+file = File.read(str)
+size=  File.foreach(str).count
+hash= ActiveSupport::JSON.decode(file)
+i=0
+j=0
+hash["features"].each do |key, array|
+  if(j % (size/100)==0)
+    puts "Loading, please wait-#{((j/size.to_f)*100).round(0)}"
+  end
+	if((hash["features"][j]["properties"]["featurecla"] == "Admin-0 capital") && (!Country.where("name = ?",hash["features"][j]["properties"]["sov0name"]).blank?))
+		geom= hash["features"][j]["geometry"].to_s.gsub('=>',':')
+    sql = "INSERT INTO cities  VALUES
+				(#{i},'#{hash["features"][j]["properties"]["name"].gsub("'","")}',ST_GeomFromGeoJSON('#{geom}'),(SELECT id FROM countries WHERE name = '#{hash["features"][j]["properties"]["sov0name"]}'), '#{Time.now}','#{Time.now}')"
+
+    ActiveRecord::Base.connection.execute(sql)
+			i=i+1
+  end
+	#puts "Loading...#{i}%"
+	j=j+1
+end
+puts "Cities loaded"
 ##########Full-text search##########
 sql= "ALTER TABLE conflicts ADD COLUMN tsv tsvector;"
 ActiveRecord::Base.connection.execute(sql)
 ##########CONFLICTS#################
+puts "Reading File, standby"
+str= File.absolute_path("db/ACLED_GIS_2015.json")
+file = File.read(str)
+#size=  File.foreach(str).count
+size=5000
+hash= ActiveSupport::JSON.decode(file)
+i=0
+
 hash["features"].each do |key, array|
+	if(i % (size/100)==0)
+		puts "Loading, please wait-#{((i/size.to_f)*100).round(0)}"
+	end
         geom= hash["features"][i]["geometry"].to_s.gsub('=>',':')
         sql = "INSERT INTO conflicts  VALUES
         (#{i},#{hash["features"][i]["properties"]["GWNO"]},'#{hash["features"][i]["properties"]["EVENT_ID_C"]}',#{hash["features"][i]["properties"]["EVENT_ID_N"]},'#{hash["features"][i]["properties"]["EVENT_DATE"]}',#{hash["features"][i]["properties"]["YEAR"]},(SELECT id FROM event_types WHERE type_name= '#{hash["features"][i]["properties"]["EVENT_TYPE"]}'),(SELECT id FROM countries WHERE name= '#{hash["features"][i]["properties"]["COUNTRY"]}'),'#{hash["features"][i]["properties"]["NOTES"].to_s.gsub("'", "").gsub("\n"," ").gsub(/"/, '').gsub("\t"," ")}',#{hash["features"][i]["properties"]["FATALITIES"]},#{hash["features"][i]["properties"]["INTER1"]},#{hash["features"][i]["properties"]["INTER2"]},'#{hash["features"][i]["properties"]["ACTOR1"].to_s.gsub(":","-")}','#{hash["features"][i]["properties"]["ACTOR2"]}',#{hash["features"][i]["properties"]["INTERACTIO"]}, ST_GeomFromGeoJSON('#{geom}'),'#{Time.now}','#{Time.now}')"
@@ -90,7 +122,11 @@ hash["features"].each do |key, array|
   ActiveRecord::Base.connection.execute(sql)
   #puts "Loading...#{i}%"
   i=i+1
+  if(i>(size+3000))
+    break
+  end
 end
+puts "Conflicts loaded"
 ########Full-text search####################
 sql= "UPDATE conflicts SET tsv= to_tsvector(notes||' '||actor1||' '||actor2);"
 ActiveRecord::Base.connection.execute(sql)
