@@ -39,7 +39,7 @@ There are more conflict datasets with geoinformation, however some of them are p
 
 **Find conflicts based on keywords**
 
-`GET /search?name=hviezda&lat=25346&long=46346123`
+`GET /search?utf8=%E2%9C%93&event[date_start]=&event[date_stop]=&event[country_id]=1&event[type_id]=0&event[actor1]=0&event[actor2]=0&event[fatals]=&event[kwds]=militia+%26+soldier+%26+ambush&commit=Search`
 
 ### Response
 
