@@ -20,7 +20,7 @@ Build a map-based application, which lets the user see geo-based data on a map a
 
 Fork this repository and fill in (either in English, or in Slovak):
 
-**Application description**: Zobrazenie vojnových konfliktov z obdobia 97-14 v oblasti Afriky a Ázie
+**Application description**: Zobrazenie vojnových konfliktov z obdobia 97-14 v oblasti Afriky a Ázie. Vyhladavanie na zaklade poctu mrtvych, datumu, klucovych slov, ucastnikov a typu konfliktu
 
 **Data source**: http://www.acleddata.com/data/
 

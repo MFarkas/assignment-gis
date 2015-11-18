@@ -1,7 +1,7 @@
 class MapController < ApplicationController
 
   def show
-    @conflicts= Conflict.where("id<5")
+    @conflicts= Conflict.all.order(fatalities: :desc).limit(200)
     @geojson= []
     @geojson << '['
     @conflicts.each.with_index do |c, index|
@@ -33,7 +33,7 @@ class MapController < ApplicationController
     if(params[:event][:actor2]!= "0")
       @conflicts= @conflicts.where("INTER2 = ?",params[:event][:actor2])
     end
-    if(params[:event][:fatals]!="")
+    if(params[:event][:fatals]!="") &&(params[:event][:fatals][0]=='<'||params[:event][:fatals][0]=='>')
       @conflicts= @conflicts.where("FATALITIES #{params[:event][:fatals][0]} ?",params[:event][:fatals][1..-1])
     end
     if((params[:event][:date_stop]!="") && (params[:event][:date_start]!=""))
@@ -41,6 +41,7 @@ class MapController < ApplicationController
       stop=  params[:event][:date_stop] + " 00:00:00"
       @conflicts= @conflicts.where("event_date between ? and ?",start,stop)
     end
+    @conflicts=@conflicts.order(fatalities: :desc).limit(200)
     @geojson= []
     @geojson << '['
     @conflicts.includes(:country).each.with_index do |c, index|
@@ -50,6 +51,7 @@ class MapController < ApplicationController
       end
     end
     @geojson << ']'
+    puts @geojson
     render :show
   end
 
@@ -60,9 +62,9 @@ class MapController < ApplicationController
     selected_conflict= Conflict.find(params[:id])
     sc_json= JSON[selected_conflict.build_geojson]
     @center= { :y => sc_json["geometry"]["coordinates"][0], :x => sc_json["geometry"]["coordinates"][1] }
-    @conflicts= Conflict.all.where("ST_DWithin(geometry, ?,0.5)",selected_conflict.geometry)
+    @conflicts= Conflict.all.where("(28>abs(EXTRACT( DAY FROM (event_date- ?)))) AND ST_DWithin(geometry, ?,0.5)",selected_conflict.event_date,selected_conflict.geometry)
     #,selected_conflict.event_date,
-    #28>abs(EXTRACT( DAY FROM (event_date- ?)))) AND
+    #
     @geojson= []
     @geojson << '['
     @conflicts.each.with_index do |c, index|

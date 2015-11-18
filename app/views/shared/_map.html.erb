@@ -7,7 +7,7 @@
   <script>
       var geojson= <%= raw @geojson.to_s.gsub('=>',':')%>
               L.mapbox.accessToken = 'pk.eyJ1IjoibWZhcmthcyIsImEiOiJjaWZzb2JpenowMXcydTRsejNtN2J3M2IwIn0.aBcVeivukzoDpesJrsB-SQ';
-      var map = L.mapbox.map('map', 'mapbox.streets')
+      var map = L.mapbox.map('map', 'mfarkas.4985f1f6')
               .setView([0, 35], 4)
 
 
@@ -21,7 +21,7 @@
           var filterCircle = L.circle(L.latLng(centerX,centerY), RADIUS, {
               opacity: 1,
               weight: 1,
-              fillOpacity: 0.4
+              fillOpacity: 0.1
           }).addTo(map);
       <%end%>
       fl.eachLayer(function(layer) {
@@ -29,7 +29,8 @@
           // here you call `bindPopup` with a string of HTML you create - the feature
           // properties declared above are available under `layer.feature.properties`
           var content = '<h2>'+ layer.feature.properties.title+'<\/h2>' +
-                  '<p><b>Country:</b> ' + layer.feature.properties.country + '<br \/>' +
+                  '<p><b>Country:</b> ' + layer.feature.properties.country  +', '+
+                   layer.feature.properties.locfromcap +'<br \/>' +
                   '<b>Fatalities:</b> ' + layer.feature.properties.fatalities + '<br \/>' +
                   '<b>Actor1:</b> ' + layer.feature.properties.actor1 + '<br \/>' +
                   '<b>Actor2:</b> ' + layer.feature.properties.actor2 + '<br \/>' +
@@ -39,6 +40,7 @@
           layer.bindPopup(content);
       });
       map.fitBounds(fl.getBounds());
+
 
       //L.mapbox.featureLayer.bindPopup(content);
   </script>

@@ -40,6 +40,7 @@ ActiveRecord::Schema.define(version: 20151116022831) do
     t.string   "actor1"
     t.string   "actor2"
     t.integer  "interaction"
+    t.string   "locfromcap"
     t.geometry "geometry",      limit: {:srid=>0, :type=>"geometry"}
     t.datetime "created_at",                                          null: false
     t.datetime "updated_at",                                          null: false

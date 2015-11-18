@@ -2,7 +2,6 @@ class Conflict < ActiveRecord::Base
 belongs_to :country
 belongs_to :event_type
   def build_geojson
-
     geojson=  '{
     "type": "Feature",
     "geometry": '+RGeo::GeoJSON.encode(self.geometry).to_s.gsub('=>' , ':') +',
@@ -12,6 +11,7 @@ belongs_to :event_type
       "event_date": "'+self.event_date.to_date.to_s+'",
       "country": "'+self.country.name+'",
       "fatalities": "'+self.fatalities.to_s+'",
+      "locfromcap": "'+self.locfromcap+'",
       "id": "'+self.id.to_s+'",
       "actor1": "'+self.actor1.to_s+'",
       "actor2": "'+self.actor2.to_s+'",

@@ -87,7 +87,7 @@ hash["features"].each do |key, array|
   if(j % (size/100)==0)
     puts "Loading, please wait-#{((j/size.to_f)*100).round(0)}"
   end
-	if((hash["features"][j]["properties"]["featurecla"] == "Admin-0 capital") && (!Country.where("name = ?",hash["features"][j]["properties"]["sov0name"]).blank?))
+	if((hash["features"][j]["properties"]["featurecla"] == "Admin-0 capital")&&(hash["features"][j]["properties"]["name"] != "Johannesburg") &&(hash["features"][j]["properties"]["name"] != "Bloemfontein") &&(hash["features"][j]["properties"]["name"] != "Cape Town")&&(hash["features"][j]["properties"]["name"] != "Abidjan")&& (!Country.where("name = ?",hash["features"][j]["properties"]["sov0name"]).blank?))
 		geom= hash["features"][j]["geometry"].to_s.gsub('=>',':')
     sql = "INSERT INTO cities  VALUES
 				(#{i},'#{hash["features"][j]["properties"]["name"].gsub("'","")}',ST_GeomFromGeoJSON('#{geom}'),(SELECT id FROM countries WHERE name = '#{hash["features"][j]["properties"]["sov0name"]}'), '#{Time.now}','#{Time.now}')"
@@ -98,6 +98,7 @@ hash["features"].each do |key, array|
 	#puts "Loading...#{i}%"
 	j=j+1
 end
+
 puts "Cities loaded"
 ##########Full-text search##########
 sql= "ALTER TABLE conflicts ADD COLUMN tsv tsvector;"
@@ -106,18 +107,48 @@ ActiveRecord::Base.connection.execute(sql)
 puts "Reading File, standby"
 str= File.absolute_path("db/ACLED_GIS_2015.json")
 file = File.read(str)
-#size=  File.foreach(str).count
-size=5000
+size=  File.foreach(str).count
+#size=5000
 hash= ActiveSupport::JSON.decode(file)
 i=0
 
 hash["features"].each do |key, array|
 	if(i % (size/100)==0)
 		puts "Loading, please wait-#{((i/size.to_f)*100).round(0)}"
+  end
+	geom= hash["features"][i]["geometry"].to_s.gsub('=>',':')
+	sql= "SELECT  ST_Azimuth(gg1,gg2) As az,ST_Distance(gg1, gg2, false) As sphere_dist
+    FROM (SELECT
+    ST_GeographyFromText('SRID=4326;'||(SELECT ST_AsText(geometry) FROM cities WHERE country_id= (SELECT id FROM countries WHERE name= '#{hash["features"][i]["properties"]["COUNTRY"]}'))) As gg1,
+    ST_GeographyFromText('SRID=4326;' ||(ST_AsText(ST_GeomFromGeoJSON('#{geom}')))) As gg2
+    ) As foo"
+
+	ret= ActiveRecord::Base.connection.execute(sql)
+
+	#North = 0; East = π/2; South = π; West = 3π/2.
+	case
+		when (ret.values[0][0].to_f >= Math::PI/8.to_f) && (ret.values[0][0].to_f < 3*Math::PI/8.to_f)
+			dir= "southwest"
+		when (ret.values[0][0].to_f >=3*Math::PI/8.to_f) && (ret.values[0][0].to_f < 5*Math::PI/8.to_f)
+			dir= "west"
+		when (ret.values[0][0].to_f >= 5*Math::PI/8.to_f) && (ret.values[0][0].to_f < 7*Math::PI/8.to_f)
+			dir= "northwest"
+		when (ret.values[0][0].to_f >= 7*Math::PI/8.to_f) && (ret.values[0][0].to_f < 9*Math::PI/8.to_f)
+			dir= "north"
+		when (ret.values[0][0].to_f >= 9*Math::PI/8.to_f) && (ret.values[0][0].to_f < 11*Math::PI/8.to_f)
+			dir= "northeast"
+		when (ret.values[0][0].to_f >= 11*Math::PI/8.to_f) && (ret.values[0][0].to_f < 13*Math::PI/8.to_f)
+			dir= "east"
+		when (ret.values[0][0].to_f >= 13*Math::PI/8.to_f) && (ret.values[0][0].to_f < 15*Math::PI/8.to_f)
+			dir= "southeast"
+		else
+			dir= "south"
 	end
-        geom= hash["features"][i]["geometry"].to_s.gsub('=>',':')
-        sql = "INSERT INTO conflicts  VALUES
-        (#{i},#{hash["features"][i]["properties"]["GWNO"]},'#{hash["features"][i]["properties"]["EVENT_ID_C"]}',#{hash["features"][i]["properties"]["EVENT_ID_N"]},'#{hash["features"][i]["properties"]["EVENT_DATE"]}',#{hash["features"][i]["properties"]["YEAR"]},(SELECT id FROM event_types WHERE type_name= '#{hash["features"][i]["properties"]["EVENT_TYPE"]}'),(SELECT id FROM countries WHERE name= '#{hash["features"][i]["properties"]["COUNTRY"]}'),'#{hash["features"][i]["properties"]["NOTES"].to_s.gsub("'", "").gsub("\n"," ").gsub(/"/, '').gsub("\t"," ")}',#{hash["features"][i]["properties"]["FATALITIES"]},#{hash["features"][i]["properties"]["INTER1"]},#{hash["features"][i]["properties"]["INTER2"]},'#{hash["features"][i]["properties"]["ACTOR1"].to_s.gsub(":","-")}','#{hash["features"][i]["properties"]["ACTOR2"]}',#{hash["features"][i]["properties"]["INTERACTIO"]}, ST_GeomFromGeoJSON('#{geom}'),'#{Time.now}','#{Time.now}')"
+
+  ltc= (ret.values[0][1].to_f/1000).round(0).to_s+ 'km '+ dir +' to capital'
+
+	sql = "INSERT INTO conflicts  VALUES
+	(#{i},#{hash["features"][i]["properties"]["GWNO"]},'#{hash["features"][i]["properties"]["EVENT_ID_C"]}',#{hash["features"][i]["properties"]["EVENT_ID_N"]},'#{hash["features"][i]["properties"]["EVENT_DATE"]}',#{hash["features"][i]["properties"]["YEAR"]},(SELECT id FROM event_types WHERE type_name= '#{hash["features"][i]["properties"]["EVENT_TYPE"]}'),(SELECT id FROM countries WHERE name= '#{hash["features"][i]["properties"]["COUNTRY"]}'),'#{hash["features"][i]["properties"]["NOTES"].to_s.gsub("'", "").gsub("\n"," ").gsub(/"/, '').gsub("\t"," ")}',#{hash["features"][i]["properties"]["FATALITIES"]},#{hash["features"][i]["properties"]["INTER1"]},#{hash["features"][i]["properties"]["INTER2"]},'#{hash["features"][i]["properties"]["ACTOR1"].to_s.gsub(":","-").gsub("'", "").gsub("\n"," ").gsub(/"/, '').gsub("\t"," ")}','#{hash["features"][i]["properties"]["ACTOR2"].to_s.gsub("'", "").gsub("\n"," ").gsub(/"/, '').gsub("\t"," ")}',#{hash["features"][i]["properties"]["INTERACTIO"]},'#{ltc}', ST_GeomFromGeoJSON('#{geom}'),'#{Time.now}','#{Time.now}')"
 
   ActiveRecord::Base.connection.execute(sql)
   #puts "Loading...#{i}%"
@@ -133,4 +164,22 @@ ActiveRecord::Base.connection.execute(sql)
 
 sql= "CREATE INDEX tsv_GIN ON conflicts USING gin(tsv);"
 ActiveRecord::Base.connection.execute(sql)
+###########INDEXES############################
 
+sql= "CREATE UNIQUE INDEX fatalities_idx ON conflicts (fatalities);"
+ActiveRecord::Base.connection.execute(sql)
+
+sql= "CREATE UNIQUE INDEX event_date_idx ON conflicts (event_date);"
+ActiveRecord::Base.connection.execute(sql)
+
+sql= "CREATE UNIQUE INDEX country_id_idx ON conflicts (country_id);"
+ActiveRecord::Base.connection.execute(sql)
+
+sql= "CREATE UNIQUE INDEX event_type_idx ON conflicts (event_type);"
+ActiveRecord::Base.connection.execute(sql)
+
+sql= "CREATE UNIQUE INDEX inter1_idx ON conflicts (inter1);"
+ActiveRecord::Base.connection.execute(sql)
+
+sql= "CREATE UNIQUE INDEX inter2_idx ON conflicts (inter2);"
+ActiveRecord::Base.connection.execute(sql)

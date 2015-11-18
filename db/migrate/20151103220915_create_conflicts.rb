@@ -15,6 +15,7 @@ class CreateConflicts < ActiveRecord::Migration
       t.string    :actor1
       t.string    :actor2
       t.integer   :interaction
+      t.string    :locfromcap
       #t.column    :geometry, :geometry
       t.geometry :geometry
       t.timestamps null: false
