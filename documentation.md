@@ -31,6 +31,8 @@ Conflict data comes from ACLED datasets for Africa97-2015. This data can be down
 
 There are more conflict datasets with geoinformation, however some of them are paid only and others are incopatible with ACLED, meaning i would have to merge their schema in a meaningful way.
 
+Data is not part of archive submitted in IS due to size restraints, please download it from github repository and place in db folder. There may be problems during seeding database due to poorly formatted json files. This may have not been fixed due to the extremely long seed time requirements.
+
 ## Api
 
 **Find conflicts based on number of fatalities**
